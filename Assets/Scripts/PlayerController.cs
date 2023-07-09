@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.ConstrainedExecution;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -12,8 +14,20 @@ public class PlayerController : MonoBehaviour
     private float _moveSpeed;
     [SerializeField]
     private float _jumpForce;
+    [SerializeField]
+    private Transform attackPoint;
+    [SerializeField]
+    private int attackRange;
+    [SerializeField]
+    private LayerMask enemyLayers;
+    [SerializeField]
+    private float damage;
+    [SerializeField]
+    private Health playerHealth;
 
     private bool isJump = false;
+    private bool isClimbing;
+    public bool isLadder;
 
     // Start is called before the first frame update
     void Start()
@@ -31,6 +45,34 @@ public class PlayerController : MonoBehaviour
 
         MoveControl(horizontal);
         JumpControl(vertical);
+        CheckHealth();
+
+        if(Input.GetMouseButtonDown(0))
+        {
+            playerAnimator.SetTrigger("Attack");
+        }
+
+        if(isLadder && Mathf.Abs(vertical) > 0)
+            isClimbing = true;
+
+        if (isClimbing)
+        {
+            playerRb.gravityScale = 0f;
+            playerRb.velocity = new Vector2(playerRb.velocity.x, vertical * _moveSpeed);
+        }
+        else
+        {
+            playerRb.gravityScale = 2f;
+        }
+    }
+
+    private void CheckHealth()
+    {
+        if (playerHealth.isDead)
+        {
+            Destroy(this.gameObject, .2f);
+            SceneManager.LoadScene(2);
+        }
     }
 
     private void JumpControl(float vertical)
@@ -69,5 +111,42 @@ public class PlayerController : MonoBehaviour
         Vector3 curPos = transform.position;
         curPos.x += horizontal * _moveSpeed * Time.deltaTime;
         transform.position = curPos;
+    }
+
+    public void AttackEvent()
+    {
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
+
+        foreach (Collider2D enemy in hitEnemies)
+        {
+            enemy.GetComponent<Health>().TakeDamage(damage);
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (attackPoint == null)
+            return;
+
+        Gizmos.DrawWireSphere(attackPoint.position, attackRange);
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision == null) return;
+        if(collision.CompareTag("Ladder"))
+        {
+            isLadder = true;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if(collision == null) return;
+        if(collision.CompareTag("Ladder"))
+        {
+            isLadder = false;
+            isClimbing = false;
+        }
     }
 }
