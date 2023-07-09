@@ -1,6 +1,10 @@
 # Broforce-Clone
 A 2D replica of Broforce game made in Unity.
 
+## Gameplay Video
+
+https://www.loom.com/share/40ecca7c4c6b4229aadbf4ded64e68f4?sid=5ed2518b-ec29-443b-9196-99efe336d0ad
+
 ## Description
 I have named it **Trying to be Broforce** as it is still under development. TTBB is classic arcade-style replica of brototype where players control a character and try to cross and complete
 a level filled with interesting design and enemies. It has been developed for a Game Jam within 3 days using free assets available on the internet (Mostly assetstore.unity.com and kenney.nl).
